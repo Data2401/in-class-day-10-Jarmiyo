@@ -30,7 +30,7 @@ Because you're in an RProject, you don't need to set your working directory in R
 - Use the glimpse function to look at the loaded data
 
 ```{r}
-
+glimpse(grants)
 
 ```
 
@@ -38,7 +38,7 @@ Because you're in an RProject, you don't need to set your working directory in R
 - Create a variable `org` that contains the `organization` column of the dataset
 
 ```{r}
-
+org <- grants$organization
 
 ```
 
@@ -46,7 +46,7 @@ Because you're in an RProject, you don't need to set your working directory in R
 - Confirm that the "organization" column is a vector using the `is.vector()` function. (This is a useful debugging tip if you hit errors later!)
 
 ```{r}
-
+is.vector(grants$orgnaizations)
 
 ```
 
@@ -56,21 +56,21 @@ Now you can ask some interesting questions about the dataset:
 - What was the mean grant value?
 
 ```{r}
-
+mean(grants$total_amount)
 ```
 
 
 - What was the dollar amount of the largest grant?
 
 ```{r}
-
+max(grants$total_amount)
 ```
 
 
 - What was the dollar amount of the smallest grant?
 
 ```{r}
-
+min(grants$total_amount)
 ```
 
 
@@ -78,26 +78,26 @@ Now you can ask some interesting questions about the dataset:
 
 ```{r}
 
-
+grants$organization[which.max(grants$total_amount)]
 ```
 
 
 - Which organization received the smallest grant?
 
 ```{r}
-
+grants$organization[which.min(grants$total_amount)]
 ```
 
 - How many grants were awarded in 2010?
 
 ```{r}
-
+length(grants$start_year[grants$start_year == 2010])
 ```
 
 - How much was awarded in 2010? 
 
 ```{r}
-
+sum(grants$total_amount[grants$start_year == 2010])
 ```
 
 
@@ -123,13 +123,13 @@ Luckily, you can pass the USPersonalExpenditure variable as an argument to the `
 Do this, storing the result in a new variable
 
 ```{r}
-
+dt <-data.frame(USPersonalExpenditure)
 ```
 
 
 What are the current column names of your dataframe?
 ```{r}
-
+colnames(dt)
 ```
 
 
@@ -137,58 +137,68 @@ Consider: why are they so strange? (Think about whether you could use a number l
 
 What are the current row names of your dataframe?
 ```{r}
-
+rownames(dt)
 ```
 
 
 Add a column "Category" to your data frame that contains the rownames
 
 ```{r}
-
+dt$Category <- rownames(dt)
+dt
 ```
 
 Consider how this data isn't tidy. Use the `pivot_longer()` function from last class to make the data tidy. 
 
 ```{r}
-
+library(tidyverse)
+newdt <-pivot_longer(
+  data = dt,
+  cols = c("X1940", "X1945", "X1950", "X1955", "X1960"),
+  names_to = "year",
+  values_to = "price"
+  
+)
+newdt
 ```
 
 
 How much money was spent on personal care in 1940?
 ```{r}
 
+newdt$price[newdt$Category == "Personal Care" & newdt$year == 'X1940']
 ```
 
 
 How much money was spent on Food and Tobacco in 1960?
 ```{r}
-
+newdt$price[newdt$Category == "Food and Tobacco" & newdt$year == 'X1960']
 
 ```
 
 
 What was the highest expenditure category in 1960?
 ```{r}
-
+newdt$Category[newdt$year =="X1960"][which.max(newdt$price[newdt$year == "X1960"])]
 
 ```
 
 
 Define a function `lowest_category` that takes in a year as a parameter, and returns the lowest spending category of that year
 ```{r}
-
-
-
+lowc <- function(yearnum){
+return (newdt$Category[newdt$year == yearnum][which.min(newdt$price[newdt$year == yearnum])])
+}
+lowc("X1960")
 ```
 
-```{r}
-
-```
 
 
 Using your function, determine the lowest spending category of each year
 Hint: use the `sapply()` function to apply your function to a vector of years
 
 ```{r}
-
+years <- unique(newdt$year)
+low_cat_year <- sapply(years, lowc)
+low_cat_year
 ```
